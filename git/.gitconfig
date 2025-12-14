@@ -1,0 +1,31 @@
+[alias]
+    s = status
+    co = checkout
+    c = commit
+    a = add
+    b = branch
+    p = push
+    l = log --oneline --graph --decorate
+
+[core]
+    editor = vim
+    excludesfile = ~/.gitignore_global
+    autocrlf = input
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true    # use n and N to move between diff sections
+    line-numbers = true
+    side-by-side = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default
+
+[init]
+    defaultBranch = main

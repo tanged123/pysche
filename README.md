@@ -2,6 +2,13 @@
 
 A personal repository containing my preferred developer settings and configurations.
 
+## Prerequisites
+
+**Important**: This setup relies on [Nerd Fonts](https://www.nerdfonts.com/) to render icons in the terminal.
+1. Download a font like **JetBrainsMono Nerd Font**.
+2. Install it on your system.
+3. Configure your terminal (VS Code, iTerm, Windows Terminal) to use it.
+
 ## Contents
 
 - **Bash**: Custom `.bashrc` with aliases, navigation shorthands, and git shortcuts.

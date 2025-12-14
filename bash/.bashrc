@@ -128,3 +128,6 @@ alias gwip='git-nuke'
 # 7. STARSHIP INIT
 # -----------------------------------------------------------
 eval "$(starship init bash)"
+
+# 8. PYSCHE EXTRAS
+source /home/tanged/sources/pysche/bash/extras.bashrc
