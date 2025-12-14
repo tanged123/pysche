@@ -1,0 +1,15 @@
+# General
+.DS_Store
+*~
+*.swp
+
+# Logs
+logs/
+*.log
+
+# Dependencies
+node_modules/
+dist/
+target/
+.venv/
+__pycache__/
