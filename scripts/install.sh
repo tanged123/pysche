@@ -274,7 +274,20 @@ if [ -z "$CURRENT_NAME" ] || [ -z "$CURRENT_EMAIL" ]; then
     fi
 fi
 
-# Tmux
-append_source "$HOME/.tmux.conf" "source-file $DOTFILES_DIR/tmux/.tmux.conf" "# Pysche Tmux"
+# Tmux (Handle symlink case to avoid writing into repo)
+TMUX_SRC="$DOTFILES_DIR/tmux/.tmux.conf"
+TMUX_DEST="$HOME/.tmux.conf"
+
+if [ -L "$TMUX_DEST" ]; then
+    # It's a symlink - check if it points to our repo file
+    LINK_TARGET=$(readlink -f "$TMUX_DEST")
+    if [ "$LINK_TARGET" == "$TMUX_SRC" ]; then
+        log "Breaking symlink to avoid writing into repo file..."
+        rm "$TMUX_DEST"
+        touch "$TMUX_DEST"
+    fi
+fi
+
+append_source "$TMUX_DEST" "source-file $TMUX_SRC" "# Pysche Tmux"
 
 echo "🎉 Done! please restart your shell or run 'source ~/.bashrc'"
