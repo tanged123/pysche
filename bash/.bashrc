@@ -183,6 +183,13 @@ function git-nuke() {
         echo "❌ Not a git repository. Aborting."
         return 1
     fi
+
+    # Parse exclusion patterns
+    local clean_args=("-fdx")
+    for arg in "$@"; do
+        clean_args+=("-e" "$arg")
+    done
+
     # 2. Safety checklist: No Home, No Root
     if [[ "$PWD" == "$HOME" ]]; then
         echo "❌ DANGER: You are in your HOME directory. git-nuke is not allowed here."
@@ -196,6 +203,9 @@ function git-nuke() {
     echo "☢️  NUKING REPOSITORY & SUBMODULES... ☢️"
     echo "Current directory: $PWD"
     echo "This will destroy all untracked files and reset everything to HEAD."
+    if [ ${#@} -gt 0 ]; then
+        echo "Excluding patterns: $@"
+    fi
     read -p "Are you absolutely sure? (y/N) " -n 1 -r
     echo    # Move to a new line
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -205,9 +215,9 @@ function git-nuke() {
     echo "Step 1: Resetting main repo..."
     git reset --hard HEAD
     echo "Step 2: Cleaning untracked files..."
-    git clean -fdx
+    git clean "${clean_args[@]}"
     echo "Step 3: Nuking submodules..."
-    git submodule foreach --recursive git clean -fdx
+    git submodule foreach --recursive git clean "${clean_args[@]}"
     git submodule foreach --recursive git reset --hard HEAD
     echo "Step 4: Pulling fresh code..."
     git pull
