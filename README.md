@@ -1,4 +1,4 @@
-# Pysche
+# Psyche
 
 A personal repository containing my preferred developer settings and configurations.
 
