@@ -76,12 +76,18 @@ if [ "$PKG_MANAGER" != "unknown" ]; then
     for tool in $TOOLS; do
         # Ubuntu specific overrides
         if [ "$PKG_MANAGER" == "apt" ]; then
-             if [ "$tool" == "eza" ]; then continue; fi 
+             if [ "$tool" == "eza" ]; then continue; fi
              if [ "$tool" == "fd-find" ]; then install_pkg fd-find; continue; fi
              if [ "$tool" == "bat" ]; then install_pkg bat; continue; fi
              if [ "$tool" == "delta" ]; then install_pkg git-delta; continue; fi # apt calls it git-delta
         fi
-        
+
+        # macOS/Homebrew specific overrides
+        if [ "$PKG_MANAGER" == "brew" ]; then
+             if [ "$tool" == "fd-find" ]; then install_pkg fd; continue; fi
+             if [ "$tool" == "delta" ]; then install_pkg git-delta; continue; fi
+        fi
+
         install_pkg $tool
     done
 else
@@ -207,7 +213,7 @@ configure_git() {
 configure_bash() {
     local src="$DOTFILES_DIR/bash/.bashrc"
     local dest="$HOME/.bashrc"
-    
+
     # Handle symlink case: .bashrc should NOT be a symlink if we want to support local configs + repo configs
     if [ -L "$dest" ]; then
         warn "Detected existing symlink for .bashrc. Replacing with standard file that sources the repo file."
@@ -226,8 +232,45 @@ configure_bash() {
     append_source "$dest" "source $src" "# Pysche Tools"
 }
 
-# Bash
+# Helper: Configure Zsh (for macOS and zsh users)
+configure_zsh() {
+    local src="$DOTFILES_DIR/zsh/.zshrc"
+    local dest="$HOME/.zshrc"
+
+    # Check if zsh config exists in repo
+    if [ ! -f "$src" ]; then
+        warn "Zsh config not found at $src. Skipping zsh setup."
+        return
+    fi
+
+    # Handle symlink case
+    if [ -L "$dest" ]; then
+        warn "Detected existing symlink for .zshrc. Replacing with standard file that sources the repo file."
+        local link_target=$(readlink -f "$dest")
+        if [ "$link_target" == "$src" ]; then
+            rm "$dest"
+            touch "$dest"
+            log "Removed symlink to repo."
+        else
+            mv "$dest" "${dest}.backup.$(date +%s)"
+            touch "$dest"
+            warn "Backed up prior symlink."
+        fi
+    fi
+
+    append_source "$dest" "source $src" "# Pysche Tools (zsh)"
+}
+
+# Configure shell(s)
+# Always configure bash (for compatibility)
 configure_bash
+
+# Configure zsh if: user's default shell is zsh OR we're on macOS
+USER_SHELL=$(basename "$SHELL")
+if [ "$USER_SHELL" == "zsh" ] || [ "$(uname)" == "Darwin" ]; then
+    log "Detected zsh or macOS - configuring zsh..."
+    configure_zsh
+fi
 
 # Starship (Config file usually needs to be at a specific path, symlinking is best)
 link_file "$DOTFILES_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
@@ -290,4 +333,10 @@ fi
 
 append_source "$TMUX_DEST" "source-file $TMUX_SRC" "# Pysche Tmux"
 
-echo "🎉 Done! please restart your shell or run 'source ~/.bashrc'"
+echo ""
+echo "Done! Please restart your shell or run:"
+if [ "$USER_SHELL" == "zsh" ] || [ "$(uname)" == "Darwin" ]; then
+    echo "  source ~/.zshrc"
+else
+    echo "  source ~/.bashrc"
+fi
